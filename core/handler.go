@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -18,8 +19,12 @@ type handler struct {
 	service Service
 }
 
-func NewHandler(s Service) Handler {
-	return &handler{service: s}
+func NewHandler(ctx context.Context, mongoURI string) Handler {
+	// create store
+	store := NewMongoStore(ctx, mongoURI)
+	// create service
+	service := NewService(store)
+	return &handler{service: service}
 }
 
 // PUT /accounts

@@ -16,7 +16,7 @@ type service struct {
 	store Store
 }
 
-func NewAccountService(s Store) Service {
+func NewService(s Store) Service {
 	return &service{store: s}
 }
 
