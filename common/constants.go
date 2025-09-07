@@ -6,4 +6,5 @@ const (
 	HttpHdrKeyRequestID     = "X-Request-ID"
 	HttpHdrKeyAuthorization = "Authorization"
 	HttpResUnauthorized     = "Unauthorized"
+	JWTKeyAudience          = "JWT-AUDIENCE"
 )

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -20,11 +21,15 @@ func NewMiddlewareChain(middlewares ...func(http.Handler) http.Handler) func(htt
 
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		reqID := r.Header.Get(common.HttpHdrKeyRequestID)
 		if reqID == "" {
 			reqID = uuid.New().String()
 			r.Header.Set(common.HttpHdrKeyRequestID, reqID)
 		}
+		ctx := context.WithValue(r.Context(), common.HttpHdrKeyRequestID, reqID)
+		r = r.WithContext(ctx)
+
 		rt := time.Now()
 		crw := CustomResponseWriter{ResponseWriter: w, StatusCode: http.StatusOK}
 		defer func() {
@@ -46,6 +51,10 @@ func ValidateJWT(next http.Handler) http.Handler {
 		}
 
 		// Todo: JWT validation
+
+		// Add audience to context
+		ctx := context.WithValue(r.Context(), common.JWTKeyAudience, "shop-regionx-sectorx-idx")
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})
