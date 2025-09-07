@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ckalagara/group-a-accounts/common"
@@ -42,6 +43,30 @@ func LogRequest(next http.Handler) http.Handler {
 	})
 }
 
+func ValidateClearence(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// validate admin audience
+		aud := r.Context().Value(common.JWTKeyAudience)
+		if strings.HasPrefix(aud.(string), "admin") == false {
+			http.Error(w, common.HttpResUnauthorized, http.StatusUnauthorized)
+			return
+		}
+		if !CallClearenceAPI(r) {
+			http.Error(w, common.HttpResUnauthorized, http.StatusUnauthorized)
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func CallClearenceAPI(r *http.Request) bool {
+
+	// Todo: call clearence API & validate the clearence code with audience
+	// clearence := r.Header.Get("X-Clearence-Code") // one time usage
+
+	return false
+}
+
 func ValidateJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get(common.HttpHdrKeyAuthorization)
@@ -51,6 +76,8 @@ func ValidateJWT(next http.Handler) http.Handler {
 		}
 
 		// Todo: JWT validation
+		// regex match for audience
+		// scope validation
 
 		// Add audience to context
 		ctx := context.WithValue(r.Context(), common.JWTKeyAudience, "shop-regionx-sectorx-idx")

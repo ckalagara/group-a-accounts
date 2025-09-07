@@ -42,9 +42,12 @@ func main() {
 		w.Write(data)
 	})
 
-	srvMux.HandleFunc("GET /accounts/", h.GetAccount)
-	srvMux.HandleFunc("PUT /accounts", h.UpdateAccount)
-	srvMux.HandleFunc("DELETE /accounts/", h.DeleteAccount)
+	srvMux.HandleFunc("GET /v1/accounts/{id}", h.GetAccount)
+	srvMux.HandleFunc("PUT /v1/accounts", h.UpdateAccount)
+
+	srvMuxDes := http.NewServeMux()
+	srvMuxDes.HandleFunc("DELETE /v1/accounts/{id}", h.DeleteAccount)
+	srvMux.Handle("/", middleware.ValidateClearence(srvMuxDes))
 
 	srv := &http.Server{
 		Addr: Addr,
